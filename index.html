@@ -42,7 +42,7 @@
         model-viewer {
             width: 100%;
             height: 100%;
-            --ar-button-display: none; /* Hide default AR button initially */
+            /* The default AR button will now be visible when AR is available */
         }
         .custom-file-upload {
             border: 2px dashed #4b5563; /* border-gray-600 */
@@ -117,15 +117,17 @@
     <div id="ar-screen">
         <!-- 3D model will be loaded here -->
         <model-viewer id="ar-viewer" 
+            alt="A 3D model"
             ar 
             ar-modes="webxr scene-viewer quick-look" 
+            ar-placement="floor"
             camera-controls 
             touch-action="pan-y"
             autoplay>
         </model-viewer>
     </div>
 
-    <!-- Message Box for Errors -->
+    <!-- Message Box for Errors and Info -->
     <div id="message-box"></div>
 
     <!-- Model-Viewer Script -->
@@ -152,11 +154,11 @@
          */
         function showMessage(message, isError = true) {
             messageBox.textContent = message;
-            messageBox.style.backgroundColor = isError ? '#ef4444' : '#22c55e'; // red-500 or green-500
+            messageBox.style.backgroundColor = isError ? '#ef4444' : '#22c55e'; // bg-red-500 or bg-green-500 for success
             messageBox.style.display = 'block';
             setTimeout(() => {
                 messageBox.style.display = 'none';
-            }, 3000);
+            }, 4000); // Increased duration for better readability
         }
 
         /**
@@ -174,6 +176,9 @@
                 }
 
                 // Create a URL for the selected file
+                if (modelUrl) {
+                    URL.revokeObjectURL(modelUrl); // Clean up previous URL
+                }
                 modelUrl = URL.createObjectURL(file);
                 fileNameSpan.textContent = file.name;
                 
@@ -203,15 +208,9 @@
             // Load the model into the viewer
             modelViewer.src = modelUrl;
 
-            // Attempt to activate AR mode automatically
-            // Note: Browser security may prevent this from working without a direct user gesture on the viewer itself.
-            // The user might still need to tap the AR button provided by <model-viewer>.
-            setTimeout(() => {
-                modelViewer.activateAR().catch(error => {
-                    console.error("Failed to activate AR automatically:", error);
-                    showMessage('Could not start AR. Please tap the AR icon on the screen.', true);
-                });
-            }, 500); // A small delay can sometimes help
+            // The <model-viewer> component will now show its own AR button.
+            // The user will click that button to start the AR experience, which is more reliable.
+            showMessage('Model loaded. Click the AR icon to view in your space.', false);
         });
 
     </script>
